@@ -16,8 +16,25 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    // MAMP serves this project from the Portfolio folder.
     public string $baseURL = 'http://localhost:8888/Portfolio/PortfolioCodeIgniter/public/';
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $configuredBaseURL = env('app.baseURL');
+        if (is_string($configuredBaseURL) && $configuredBaseURL !== '') {
+            $this->baseURL = rtrim($configuredBaseURL, '/') . '/';
+            return;
+        }
+
+        // Use the actual host when viewing the local MAMP site from another device.
+        if (isset($_SERVER['HTTP_HOST'], $_SERVER['SCRIPT_NAME'])) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $path = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+            $this->baseURL = $scheme . '://' . $_SERVER['HTTP_HOST'] . ($path === '/' ? '/' : $path . '/');
+        }
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
