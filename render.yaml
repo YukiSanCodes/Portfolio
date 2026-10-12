@@ -9,5 +9,3 @@ services:
     envVars:
       - key: CI_ENVIRONMENT
         value: production
-      - key: app.baseURL
-        value: https://julian-portfolio.onrender.com/

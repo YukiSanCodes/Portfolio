@@ -24,8 +24,15 @@ class App extends BaseConfig
 
         $configuredBaseURL = env('app.baseURL');
         if (is_string($configuredBaseURL) && $configuredBaseURL !== '') {
-            $this->baseURL = rtrim($configuredBaseURL, '/') . '/';
-            return;
+            $configuredHost = parse_url($configuredBaseURL, PHP_URL_HOST);
+            $requestHost = $_SERVER['HTTP_HOST'] ?? null;
+
+            // Ignore a stale deployment URL when the request is coming from
+            // another Render service, a local IP, or a custom hostname.
+            if ($requestHost === null || $configuredHost === null || strcasecmp($configuredHost, preg_replace('/:\\d+$/', '', $requestHost)) === 0) {
+                $this->baseURL = rtrim($configuredBaseURL, '/') . '/';
+                return;
+            }
         }
 
         // Use the actual host when viewing the local MAMP site from another device.
