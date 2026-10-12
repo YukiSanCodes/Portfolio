@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: julian-portfolio
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: CI_ENVIRONMENT
+        value: production
+      - key: app_baseURL
+        value: https://julian-portfolio.onrender.com/
