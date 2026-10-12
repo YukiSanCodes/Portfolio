@@ -2,7 +2,8 @@ FROM php:8.3-apache
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libicu-dev libonig-dev \
-    && docker-php-ext-install intl mbstring \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install -j"$(nproc)" intl mbstring \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
@@ -16,7 +17,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 
 WORKDIR /var/www/html
 COPY composer.json ./
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
+    --ignore-platform-req=ext-intl \
+    --ignore-platform-req=ext-mbstring
 COPY . .
 
 RUN mkdir -p writable/cache writable/logs writable/session writable/uploads \
