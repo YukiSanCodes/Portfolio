@@ -27,9 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateCarousel = (index) => {
         current = (index + slides.length) % slides.length;
         slides.forEach((slide, slideIndex) => slide.classList.toggle('is-active', slideIndex === current));
-        const slideWidth = slides[0].getBoundingClientRect().width;
-        const gap = parseFloat(getComputedStyle(track).gap) || 0;
-        const offset = (viewport.clientWidth - slideWidth) / 2 - current * (slideWidth + gap);
+        // Center the slide using its layout position, not its transformed
+        // visual width. This keeps the active card centered on small screens.
+        const slide = slides[current];
+        const offset = (viewport.clientWidth - slide.offsetWidth) / 2 - slide.offsetLeft;
         track.style.transform = `translateX(${offset}px)`;
         status.textContent = String(current + 1).padStart(2, '0');
     };
