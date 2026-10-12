@@ -37,7 +37,10 @@ class App extends BaseConfig
 
         // Use the actual host when viewing the local MAMP site from another device.
         if (isset($_SERVER['HTTP_HOST'], $_SERVER['SCRIPT_NAME'])) {
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
+            $scheme = $forwardedProto !== ''
+                ? trim(explode(',', $forwardedProto)[0])
+                : ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
             $path = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
             $this->baseURL = $scheme . '://' . $_SERVER['HTTP_HOST'] . ($path === '/' ? '/' : $path . '/');
         }
