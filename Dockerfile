@@ -1,9 +1,3 @@
-FROM composer:2 AS dependencies
-
-WORKDIR /build
-COPY composer.json ./
-RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
-
 FROM php:8.3-apache
 
 RUN apt-get update \
@@ -12,6 +6,8 @@ RUN apt-get update \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/sites-available/*.conf \
@@ -19,7 +15,8 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/conf-available/*.conf
 
 WORKDIR /var/www/html
-COPY --from=dependencies /build/vendor ./vendor
+COPY composer.json ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 COPY . .
 
 RUN mkdir -p writable/cache writable/logs writable/session writable/uploads \
